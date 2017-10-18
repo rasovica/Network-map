@@ -18,6 +18,11 @@ Point.prototype = {
   }
 };
 
+function ip2num(ip){
+    ip = ip.split(".");
+    return parseInt(ip[0])*256**3 + parseInt(ip[1])*256**2 + parseInt(ip[2])*256 + parseInt(ip[3]);
+}
+
 function d2xy(n, d) {
     var p = new Point(0, 0);
     var rx = 0;
@@ -58,15 +63,42 @@ function loadData(pools, url) {
             pools = pools.concat(data["results"]);
             loadData(pools, data["next"]);
         }
+        data["results"].forEach(function (f) {
+            var p = d2xy(2**32, ip2num(f["network"]));
+            var network_size = (2**(32-parseInt(f["prefix_length"])))**0.5;
+            poolsGroup.append("svg:rect")
+                .attr("x", p.x)
+                .attr("y", p.y)
+                .attr("width", network_size)
+                .attr("height", network_size);
+        });
+
+        var bounds = poolsGroup.node().getBBox();
+        var scale = (65535/Math.max(bounds.width, bounds.height));
+
+        poolsGroup.transition()
+            .duration(750)
+            .attr("transform", "scale(" + scale + ")");
     });
 }
 
 function processData(data) {
-    var groupedByPrefix = new Array(33).fill([]);
-    data.forEach(function (t) {
-        groupedByPrefix[10].push(t);
+    var rtn = {};
+    data.forEach(function (f) {
+        if(rtn[f["prefix_length"]]){
+            rtn[f["prefix_length"]].push(f);
+        }else{
+            rtn[f["prefix_length"]] = [f];
+        }
     });
-    console.log(groupedByPrefix);
 }
 
-//loadData([], 'https://nodes.wlan-si.net/api/v2/pool/ip/?limit=100');
+var svgContainer = d3.select("body").append("svg")
+                                    .attr("width", 500)
+                                    .attr("height", 500)
+                                    .attr("viewBox", "0 0 65535 65535")
+                                    .attr("preserveAspectRatio" , "xMinYMin meet");
+
+var poolsGroup = svgContainer.append("svg:g");
+
+loadData([], 'https://nodes.wlan-si.net/api/v2/pool/ip/?limit=100');
