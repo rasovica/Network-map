@@ -35,6 +35,19 @@ function d2xy(n, d) {
     return p;
 }
 
+function xy2d(n, p){
+        var rx;
+        var ry;
+        var d=0;
+        for (var s=n/2; s>0; s/=2) {
+            rx = (p.x & s) > 0;
+            ry = (p.y & s) > 0;
+            d += s * s * ((3 * rx) ^ ry);
+            p.rotate(s, rx, ry);
+        }
+        return d;
+}
+
 function loadData(pools, url) {
     $.getJSON( url, function( data ) {
         if (data["next"] === null) {
@@ -52,4 +65,4 @@ function processData(data) {
     console.log(data)
 }
 
-loadData([], 'https://nodes.wlan-si.net/api/v2/pool/ip/?limit=100');
+//loadData([], 'https://nodes.wlan-si.net/api/v2/pool/ip/?limit=100');
