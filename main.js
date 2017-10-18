@@ -62,7 +62,11 @@ function loadData(pools, url) {
 }
 
 function processData(data) {
-    console.log(data)
+    var groupedByPrefix = new Array(33).fill([]);
+    data.forEach(function (t) {
+        groupedByPrefix[10].push(t);
+    });
+    console.log(groupedByPrefix);
 }
 
 //loadData([], 'https://nodes.wlan-si.net/api/v2/pool/ip/?limit=100');
