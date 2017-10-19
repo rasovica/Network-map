@@ -55,14 +55,10 @@ function xy2d(n, p){
 
 function loadData(pools, url) {
     $.getJSON( url, function( data ) {
-        if (data["next"] === null) {
-            pools = pools.concat(data["results"]);
-            processData(pools);
-        }
-        else{
-            pools = pools.concat(data["results"]);
+        if (data["next"] !== null) {
             loadData(pools, data["next"]);
         }
+
         data["results"].forEach(function (f) {
             var p = d2xy(2**32, ip2num(f["network"]));
             var network_size = (2**(32-parseInt(f["prefix_length"])))**0.5;
@@ -70,27 +66,18 @@ function loadData(pools, url) {
                 .attr("x", p.x)
                 .attr("y", p.y)
                 .attr("width", network_size)
-                .attr("height", network_size);
+                .attr("height", network_size)
+                .style("opacity", 0.1);
         });
 
-        var bounds = poolsGroup.node().getBBox();
-        var scale = (65535/Math.max(bounds.width, bounds.height));
+        var bbox = poolsGroup.node().getBBox();
 
-        poolsGroup.transition()
-            .duration(750)
-            .attr("transform", "scale(" + scale + ")");
+        svgContainer.transition().attr("viewBox", bbox.x+" "+bbox.y+" "+bbox.width+" "+bbox.height);
     });
 }
 
-function processData(data) {
-    var rtn = {};
-    data.forEach(function (f) {
-        if(rtn[f["prefix_length"]]){
-            rtn[f["prefix_length"]].push(f);
-        }else{
-            rtn[f["prefix_length"]] = [f];
-        }
-    });
+function zoomToPool(ip, prefix) {
+    
 }
 
 var svgContainer = d3.select("body").append("svg")
