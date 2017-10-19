@@ -67,25 +67,57 @@ function loadData(pools, url) {
                 .attr("y", p.y)
                 .attr("width", network_size)
                 .attr("height", network_size)
+                .attr("network", f["network"])
+                .attr("mix-blend-mode", "screen")
+                .attr("fill", "yellow")
+                .transition()
+                .duration(750)
                 .style("opacity", 0.1);
         });
 
         var bbox = poolsGroup.node().getBBox();
 
         svgContainer.transition().attr("viewBox", bbox.x+" "+bbox.y+" "+bbox.width+" "+bbox.height);
+
     });
 }
 
 function zoomToPool(ip, prefix) {
-    
+    var start = d2xy(2**32, ip2num(ip));
+    var size = (2**(32-prefix))**0.5;
+    svgContainer.transition().duration(750).attr("viewBox", start.x + " " + start.y + " " + size + " " + size);
+}
+
+function calcBoundingNetwork(bounds) {
+
 }
 
 var svgContainer = d3.select("body").append("svg")
                                     .attr("width", 500)
                                     .attr("height", 500)
                                     .attr("viewBox", "0 0 65535 65535")
+                                    .style("background-color", "black")
                                     .attr("preserveAspectRatio" , "xMinYMin meet");
 
 var poolsGroup = svgContainer.append("svg:g");
 
-loadData([], 'https://nodes.wlan-si.net/api/v2/pool/ip/?limit=100');
+d3.select("body").on("keydown", function () {
+    var current = svgContainer.attr("viewBox").split(" ").map(function (t) { return parseInt(t) });
+    var event = d3.event;
+    if(event.keyCode === 37){
+        svgContainer.transition().duration(750).attr("viewBox", Math.floor(current[0]-current[0]*0.1)+" "+current[1]+" "+current[2]+" "+current[3]);
+    }else if(event.keyCode === 38){
+        svgContainer.transition().duration(750).attr("viewBox", current[0]+" "+Math.floor(current[1]-current[1]*0.1)+" "+current[2]+" "+current[3]);
+    }else if(event.keyCode === 39){
+        svgContainer.transition().duration(750).attr("viewBox", current[0]-current[0]*0.1+" "+current[1]+" "+current[2]+" "+current[3]);
+    }else if(event.keyCode === 40){
+        svgContainer.transition().duration(750).attr("viewBox", current[0]-current[0]*0.1+" "+current[1]+" "+current[2]+" "+current[3]);
+    }else if(event.keyCode === 171){
+        svgContainer.transition().duration(750).attr("viewBox", current[0]-current[0]*0.1+" "+current[1]+" "+current[2]+" "+current[3]);
+    }else if(event.keyCode === 173){
+        svgContainer.transition().duration(750).attr("viewBox", current[0]-current[0]*0.1+" "+current[1]+" "+current[2]+" "+current[3]);
+    }
+});
+
+loadData([], 'https://nodes.wlan-si.net/api/v2/pool/ip/?limit=100&ordering=prefix_length');
+
