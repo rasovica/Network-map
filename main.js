@@ -68,8 +68,10 @@ function loadData(pools, url) {
                 .attr("width", network_size)
                 .attr("height", network_size)
                 .attr("network", f["network"])
+                .attr("prefix", f["prefix_length"])
                 .attr("mix-blend-mode", "screen")
                 .attr("fill", "yellow")
+                .on("mouseover", handleMouseOver)
                 .transition()
                 .duration(750)
                 .style("opacity", 0.1);
@@ -90,6 +92,11 @@ function zoomToPool(ip, prefix) {
 
 function calcBoundingNetwork(bounds) {
 
+}
+
+function handleMouseOver() {
+    var current = d3.select(this);
+    $("#network").html("Hovering over: " + current.attr("network")+"\\"+current.attr("prefix"));
 }
 
 var svgContainer = d3.select("body").append("svg")
